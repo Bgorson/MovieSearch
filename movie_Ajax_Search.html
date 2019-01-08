@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Favorite Movies</title>
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Movie Search</h1>
+
+    <!-- Movies will get dumped here -->
+    <div id="movies-view"></div>
+
+    <form id="movie-form">
+      <label for="movie-input">Add a Movie, Yo!</label>
+      <input type="text" id="movie-input"><br>
+
+      <!-- Button triggers new movie to be added -->
+      <input id="add-movie" type="submit" value="Add a Movie, Yo!">
+    </form>
+
+    <div id="rating"></div>
+    <div id="release"></div>
+    <div id="plot"></div>
+    <div id="img"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      // Initial array of movies
+      var movies = ["The Matrix", "The Notebook", "Mr. Nobody", "The Lion King"];
+      $("#movies-view").empty();
+      // Function for displaying movie data
+      function renderButtons() {
+        for (i=0;i<movies.length;i++){
+          var defaults = $("<button>")
+            defaults.text(movies[i]);
+            defaults.addClass("movie");
+            $('#movies-view').append(defaults) ;
+          
+        }
+        // YOUR CODE GOES HERE
+
+      }
+      function JSONMovieName(){
+        $.ajax({
+          url: "https://www.omdbapi.com/?t=" + this.innerHTML + "&y=&plot=short&apikey=trilogy",
+          method:"get"
+        }).then(function(response){
+          console.log(response);
+          $("#rating").text(("Rating: " + response.Rated));
+          $("#release").text(("Released: " + response.Released));
+          $("#plot").text(("Plot: "+ response.Plot));
+          $("#img").html("<img src='"+ response.Poster + "'>");
+        })
+       
+      }
+
+      // This function handles events where one button is clicked
+      $("#add-movie").on("click", function() {
+        event.preventDefault();
+        var newMovie = $("#movie-input").val().trim();
+        //Clears input field
+        $("#movie-input").val('');
+        //check if movie exists
+        $.ajax({
+          url: "https://www.omdbapi.com/?t=" + newMovie + "&y=&plot=short&apikey=trilogy",
+          method:"get"
+        }).then(function(response){
+          if(response.Response == "False"){
+            $("#rating").html("<h1>Not a Movie</h1>");
+            $("#release").text((""));
+            $("#plot").text((""));
+            $("#img").html("")
+          }
+          else {
+            //Checks if its been added
+            if (movies.indexOf(response.Title) == -1){
+        movies.push(response.Title);
+        console.log(response.Title)
+        var button = $("<button>");
+          button.text(response.Title);
+          button.addClass("movie");
+          $('#movies-view').append(button);
+            }
+            else {
+                $("#rating").html("<h1>You added that already</h1>");
+                $("#release").text((""));
+                $("#plot").text((""));
+                $("#img").html("")
+            }
+          }
+          })
+      })
+
+      // Calling the renderButtons function to display the initial list of movies
+      
+     $(document).on("click",".movie", JSONMovieName);
+       
+     renderButtons();
+    </script>
+  </div>
+</body>
+
+</html>
